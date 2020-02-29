@@ -1,5 +1,11 @@
 version: "3.7"
 services:
+    monitor:
+        image: golang:alpine
+        volumes:
+            - ./monitor/build/monitor:/app/monitor
+        command: /app/monitor
+
     prometheus:
         image: prom/prometheus
         volumes: 
