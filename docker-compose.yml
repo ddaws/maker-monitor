@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+    prometheus:
+        image: prom/prometheus
+        volumes: 
+            # https://prometheus.io/docs/prometheus/latest/installation/#using-docker
+            - ./prometheus/config.yml:/etc/prometheus/prometheus.yml
+        ports:
+            - 9090:9090
