@@ -7,13 +7,12 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"time"
 
+	"github.com/ddaws/maker-monitor/monitor/collector"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -31,19 +30,17 @@ const (
 )
 
 var (
-	configFile   string
-	config       Config
-	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "maker_processed_ops_total",
-		Help: "The total number of processed events",
-		ConstLabels: map[string]string{
-			"type": "Fake",
-		},
-	})
+	configFile string
+	config     Config
+	// Collectors
+	headerCollector = collector.NewHeaderCollector()
 )
 
 func init() {
+	prometheus.MustRegister(headerCollector)
+	// Add Go module build info and stats
 	prometheus.MustRegister(prometheus.NewBuildInfoCollector())
+	//prometheus.MustRegister(prometheus.NewGoCollector())
 }
 
 func main() {
@@ -79,23 +76,16 @@ func main() {
 	}
 	fmt.Println("Connected to Infura!")
 
+	// Start listening for blocks mined
 	headers := make(chan *types.Header)
-	go listenForBlocks(client, headers)
+	go listenForBlocks(client, headers, headerCollector)
 
-	go recordMetrics()
-
+	// Expose a metrics endpoint for Prometheus scraping
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(fmt.Sprintf("%s:%s", config.Host, config.Port), nil)
 }
 
-func recordMetrics() {
-	for {
-		opsProcessed.Inc()
-		time.Sleep(2 * time.Second)
-	}
-}
-
-func listenForBlocks(client *ethclient.Client, headers chan *types.Header) {
+func listenForBlocks(client *ethclient.Client, headers chan *types.Header, headerCollector *collector.HeaderCollecter) {
 	sub, err := client.SubscribeNewHead(context.Background(), headers)
 	if err != nil {
 		log.Fatal(err)
@@ -107,6 +97,7 @@ func listenForBlocks(client *ethclient.Client, headers chan *types.Header) {
 			log.Fatal(err)
 		case header := <-headers:
 			fmt.Println(header.Hash().Hex()) // 0xbc10defa8dda384c96a17640d84de5578804945d347072e091b4e5f390ddea7f
+			headerCollector.Measure(header)
 		}
 	}
 }
