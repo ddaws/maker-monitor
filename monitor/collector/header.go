@@ -3,6 +3,7 @@ package collector
 import (
 	"log"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/prometheus/client_golang/prometheus"
@@ -50,17 +51,22 @@ func (col *HeaderCollecter) Collect(ch chan<- prometheus.Metric) {
 	col.mutex.Lock()
 	// Dump accumulated header metrics
 	for _, header := range col.queue {
-		log.Printf("gasLimit=%f | gasUsed=%f", float64(header.GasLimit), float64(header.GasUsed))
 		// TODO: Assume timestamp from the block
-		ch <- prometheus.MustNewConstMetric(
-			gasLimitDesc,
-			prometheus.GaugeValue,
-			float64(header.GasLimit),
+		ch <- prometheus.NewMetricWithTimestamp(
+			time.Unix(int64(header.Time), 0),
+			prometheus.MustNewConstMetric(
+				gasLimitDesc,
+				prometheus.GaugeValue,
+				float64(header.GasLimit),
+			),
 		)
-		ch <- prometheus.MustNewConstMetric(
-			gasUsedDesc,
-			prometheus.GaugeValue,
-			float64(header.GasUsed),
+		ch <- prometheus.NewMetricWithTimestamp(
+			time.Unix(int64(header.Time), 0),
+			prometheus.MustNewConstMetric(
+				gasUsedDesc,
+				prometheus.GaugeValue,
+				float64(header.GasUsed),
+			),
 		)
 	}
 	col.queue = make([]*types.Header, 0)
@@ -69,7 +75,6 @@ func (col *HeaderCollecter) Collect(ch chan<- prometheus.Metric) {
 }
 
 func (col *HeaderCollecter) Measure(header *types.Header) {
-	log.Println("Measure")
 	col.mutex.Lock()
 	col.queue = append(col.queue, header)
 	col.mutex.Unlock()
