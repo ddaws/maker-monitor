@@ -4,14 +4,17 @@ services:
         image: golang:alpine
         expose: 
             - 8080
+        ports:
+            - 8080:8080
         volumes:
             - ./monitor/build/monitor:/app/monitor
-        command: /app/monitor
+            - ./monitor/config.yml:/app/config.yml
+        command: /app/monitor --config=/app/config.yml
 
     prometheus:
         image: prom/prometheus
+        ports:
+            - 9090:9090
         volumes: 
             # https://prometheus.io/docs/prometheus/latest/installation/#using-docker
             - ./prometheus/:/etc/prometheus/
-        ports:
-            - 9090:9090

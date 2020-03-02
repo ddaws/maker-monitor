@@ -39,7 +39,7 @@ var (
 func init() {
 	prometheus.MustRegister(headerCollector)
 	// Add Go module build info and stats
-	prometheus.MustRegister(prometheus.NewBuildInfoCollector())
+	//prometheus.MustRegister(prometheus.NewBuildInfoCollector())
 	//prometheus.MustRegister(prometheus.NewGoCollector())
 }
 
