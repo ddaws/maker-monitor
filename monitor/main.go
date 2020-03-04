@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/ddaws/go-maker/maker"
 	"github.com/ddaws/maker-monitor/monitor/collector"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -20,7 +21,7 @@ type Config struct {
 	Port   string `yaml:"port" env:"PORT" env-default:"8080"`
 	Host   string `yaml:"host" env:"HOST" env-default:"0.0.0.0"`
 	Infura struct {
-		Network   string `yaml:"network" env:"INFURA_NETWORK" env-default:"ropsten"`
+		Network   string `yaml:"network" env:"INFURA_NETWORK" env-default:"mainnet"`
 		ProjectID string `yaml:"projectID" env:"INFURA_PROJECT_ID"`
 	} `yaml:"infura"`
 }
@@ -44,7 +45,7 @@ func init() {
 }
 
 func main() {
-	fmt.Println("Starting the Maker Monitor metrics server...")
+	log.Println("Starting the Maker Monitor metrics server...")
 
 	flag.StringVar(&configFile, "config", "config.yml", "Path to the config.yml file")
 	flag.Parse()
@@ -57,7 +58,7 @@ func main() {
 		configFile = absConfigPath
 	}
 
-	fmt.Println("Reading config...")
+	log.Println("Reading config...")
 	err := cleanenv.ReadConfig(configFile, &config)
 	if err != nil {
 		log.Fatal(err)
@@ -68,13 +69,27 @@ func main() {
 	}
 
 	// Connect to Infura
-	fmt.Println("Connecting to Infura...")
+	log.Println("Connecting to Infura...")
 	infuraEndpoint := fmt.Sprintf(InfuraWebSocketAddr, config.Infura.Network, config.Infura.ProjectID)
-	client, err := ethclient.Dial(fmt.Sprintf(infuraEndpoint))
+	client, err := ethclient.Dial(infuraEndpoint)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Connected to Infura!")
+	log.Println("Connected to Infura!")
+
+	vat, err := maker.LoadVatCaller(client)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("Vat loaded...")
+	debt, err := vat.Debt(nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Printf("Total Debt %s rad", debt)
+
+	// TODO: Add a collector to collect on Vat stats
 
 	// Start listening for blocks mined
 	headers := make(chan *types.Header)
