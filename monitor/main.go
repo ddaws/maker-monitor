@@ -17,7 +17,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type Config struct {
+type configType struct {
 	Port   string `yaml:"port" env:"PORT" env-default:"8080"`
 	Host   string `yaml:"host" env:"HOST" env-default:"0.0.0.0"`
 	Infura struct {
@@ -27,12 +27,12 @@ type Config struct {
 }
 
 const (
-	InfuraWebSocketAddr = "wss://%s.infura.io/ws/v3/%s"
+	infuraWebSocketAddr = "wss://%s.infura.io/ws/v3/%s"
 )
 
 var (
 	configFile string
-	config     Config
+	config     configType
 	// Collectors
 	headerCollector = collector.NewHeaderCollector()
 )
@@ -70,7 +70,7 @@ func main() {
 
 	// Connect to Infura
 	log.Println("Connecting to Infura...")
-	infuraEndpoint := fmt.Sprintf(InfuraWebSocketAddr, config.Infura.Network, config.Infura.ProjectID)
+	infuraEndpoint := fmt.Sprintf(infuraWebSocketAddr, config.Infura.Network, config.Infura.ProjectID)
 	client, err := ethclient.Dial(infuraEndpoint)
 	if err != nil {
 		log.Fatal(err)
@@ -82,14 +82,8 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	log.Println("Vat loaded...")
-	debt, err := vat.Debt(nil)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Printf("Total Debt %s rad", debt)
-
-	// TODO: Add a collector to collect on Vat stats
+	vatCollector := collector.NewVatCollector(vat)
+	prometheus.MustRegister(vatCollector)
 
 	// Start listening for blocks mined
 	headers := make(chan *types.Header)
