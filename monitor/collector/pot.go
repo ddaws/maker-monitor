@@ -1,7 +1,7 @@
 package collector
 
 import (
-	"log"
+	"math"
 
 	"github.com/ddaws/go-maker/maker"
 	"github.com/prometheus/client_golang/prometheus"
@@ -17,19 +17,24 @@ const (
 var (
 	pieDesc = prometheus.NewDesc(
 		"mkr_pot_pie",
-		"Maker Pot pie, aka to total Dai savings accrued (rad)"
+		"Maker Pot pie, aka to total Dai savings accrued (rad)",
+		nil, nil,
 	)
 	dsrDesc = prometheus.NewDesc(
 		"mkr_pot_dsr",
-		"Maker Pot dsr, aka the Dai Savings Rate (rad)"
+		"Maker Pot dsr, aka the Dai Savings Rate (rad)",
+		nil, nil,
 	)
 	dsrAnnualizedDesc = prometheus.NewDesc(
 		"mkr_pot_dsr_apy",
-		"Maker Pot dsr annualized, aka the DSR as an annual percent return"
+		"Maker Pot dsr annualized, aka the DSR as an annual percent return",
+		nil, nil,
 	)
+	// TODO: Measure row value
 	rowDesc = prometheus.NewDesc(
 		"mkr_pot_row",
-		"Maker Pot row, aka the last drip call"
+		"Maker Pot row, aka the last drip call",
+		nil, nil,
 	)
 )
 
@@ -37,16 +42,21 @@ type potCollector struct {
 	pot *maker.PotCaller
 }
 
+// NewPotCollector returns a collector that queries the Pot Maker contract
+func NewPotCollector(pot *maker.PotCaller) prometheus.Collector {
+	return &potCollector{pot}
+}
+
 func (c *potCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- pieDesc
 	ch <- dsrDesc
-	ch <- dsrAnnualized
+	ch <- dsrAnnualizedDesc
 	ch <- rowDesc
 }
 
 func (c *potCollector) Collect(ch chan<- prometheus.Metric) {
 	// Measure the total Dai savings accumulated
-	if pieRad, err := c.pot.Pie(); err == nil {
+	if pieRad, err := c.pot.TotalPie(nil); err == nil {
 		pie := decimal.NewFromBigInt(pieRad, -maker.RadScale)
 		pieApprox, _ := pie.Float64()
 
@@ -57,7 +67,7 @@ func (c *potCollector) Collect(ch chan<- prometheus.Metric) {
 		)
 	}
 	// Measure the Dai Savings Rate
-	if dsrRad, err := c.pot.Dsr(); err == nil {
+	if dsrRad, err := c.pot.Dsr(nil); err == nil {
 		dsr := decimal.NewFromBigInt(dsrRad, -maker.RadScale)
 		dsrApprox, _ := dsr.Float64()
 
@@ -67,13 +77,13 @@ func (c *potCollector) Collect(ch chan<- prometheus.Metric) {
 			dsrApprox,
 		)
 		// Calculate annualized DSR and round to roundPrecision
-		dsrAnnualized = math.Pow(dsrApprox, secondsPerYear)
-		dsrAnnualized = math.Round(dsrAnnualized / roundPrecision) * roundPrecision
+		dsrAnnualized := math.Pow(dsrApprox, secondsPerYear)
+		dsrAnnualized = math.Round(dsrAnnualized/roundPrecision) * roundPrecision
 
 		ch <- prometheus.MustNewConstMetric(
 			dsrAnnualizedDesc,
 			prometheus.GaugeValue,
-			dsrAnnualized
+			dsrAnnualized,
 		)
 	}
 	// TODO: Measure the time since the last drip call, or the delta between drips calls. You may be able to calculate

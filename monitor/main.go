@@ -77,13 +77,21 @@ func main() {
 	}
 	log.Println("Connected to Infura!")
 
+	// Load the Vat and collector
 	vat, err := maker.LoadVatCaller(client)
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	vatCollector := collector.NewVatCollector(vat)
 	prometheus.MustRegister(vatCollector)
+
+	// Load the Pot and collector
+	pot, err := maker.LoadPotCaller(client)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	potCollector := collector.NewPotCollector(pot)
+	prometheus.MustRegister(potCollector)
 
 	// Start listening for blocks mined
 	headers := make(chan *types.Header)

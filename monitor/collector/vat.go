@@ -59,7 +59,7 @@ func (c *vatCollector) Collect(ch chan<- prometheus.Metric) {
 		)
 	}
 	// Meausre the total unbacked Dai
-	if vice, err := c.vat.Vice(); err == nil {
+	if vice, err := c.vat.Vice(nil); err == nil {
 		viceDec := decimal.NewFromBigInt(vice, -maker.RadScale)
 		viceApprox, _ := viceDec.Float64()
 
@@ -70,7 +70,7 @@ func (c *vatCollector) Collect(ch chan<- prometheus.Metric) {
 		)
 	}
 	// Measure the Maker debt ceiling, aka the total Dai available for issuance
-	if line, err := c.vat.Line(); err == nil {
+	if line, err := c.vat.Line(nil); err == nil {
 		lineDec := decimal.NewFromBigInt(line, -maker.RadScale)
 		lineApprox, _ := lineDec.Float64()
 
