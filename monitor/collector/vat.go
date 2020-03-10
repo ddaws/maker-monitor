@@ -1,8 +1,11 @@
 package collector
 
 import (
+	"log"
+
 	"github.com/ddaws/go-maker/maker"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/shopspring/decimal"
 )
 
 // TODO: Add support for measuring Ilks, urns, gem, dai, and sin
@@ -40,11 +43,17 @@ func (c *vatCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *vatCollector) Collect(ch chan<- prometheus.Metric) {
-	if _, err := c.vat.Debt(nil); err == nil {
+
+	if debt, err := c.vat.Debt(nil); err == nil {
+		debtDec := decimal.NewFromBigInt(debt, -maker.RadScale)
+		debtApprox, _ := debtDec.Float64()
+
+		log.Printf("vatCollector.Collect(debtApprox=%.4f)", debtApprox)
+
 		ch <- prometheus.MustNewConstMetric(
 			debtDesc,
 			prometheus.GaugeValue,
-			0.0, // FIXME: Need to determine the correct way to convert a Rad to a float64
+			debtApprox,
 		)
 	}
 }
