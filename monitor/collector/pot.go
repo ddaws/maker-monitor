@@ -51,4 +51,15 @@ func (c *potCollector) Collect(ch chan<- prometheus.Metric) {
 			pieApprox,
 		)
 	}
+	// Measure the Dai Savings Rate
+	if dsrRad, err := c.pot.Dsr(); err == nil {
+		dsr := decimal.NewFromBigInt(dsrRad, -maker.RadScale)
+		dsrApprox, _ := dsr.Float64()
+
+		ch <- prometheus.MustNewConstMetric(
+			dsrDesc,
+			prometheus.GaugeValue,
+			dsrApprox,
+		)
+	}
 }
