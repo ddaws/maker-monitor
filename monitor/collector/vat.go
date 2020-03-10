@@ -12,17 +12,17 @@ import (
 var (
 	debtDesc = prometheus.NewDesc(
 		"mkr_vat_debt",
-		"Maker Vat debt casted from a uint256 value (rad)",
+		"Maker Vat debt, aka the total Dai in issuance (rad)",
 		nil, nil,
 	)
 	viceDesc = prometheus.NewDesc(
 		"mkr_vat_vice",
-		"Maker Vat vice casted from a uint256 value (rad)",
+		"Maker Vat vice, aka total unbacked Dai (rad)",
 		nil, nil,
 	)
 	lineDesc = prometheus.NewDesc(
 		"mkr_vat_line",
-		"Maker Vat line casted from a uint256 (rad)",
+		"Maker Vat line, aka the debt ceiling (rad)",
 		nil, nil,
 	)
 )
