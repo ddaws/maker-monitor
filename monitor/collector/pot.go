@@ -8,6 +8,11 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const (
+	secondsPerYear = float64(365 * 24 * 60 * 60)
+	roundPrecision = 0.001
+)
+
 // TODO: Add support for measuring Ilks, urns, gem, dai, and sin
 var (
 	pieDesc = prometheus.NewDesc(
@@ -18,7 +23,7 @@ var (
 		"mkr_pot_dsr",
 		"Maker Pot dsr, aka the Dai Savings Rate (rad)"
 	)
-	dsrAnnualized = prometheus.NewDesc(
+	dsrAnnualizedDesc = prometheus.NewDesc(
 		"mkr_pot_dsr_apy",
 		"Maker Pot dsr annualized, aka the DSR as an annual percent return"
 	)
@@ -60,6 +65,15 @@ func (c *potCollector) Collect(ch chan<- prometheus.Metric) {
 			dsrDesc,
 			prometheus.GaugeValue,
 			dsrApprox,
+		)
+		// Calculate annualized DSR and round to roundPrecision
+		dsrAnnualized = math.Pow(dsrApprox, secondsPerYear)
+		dsrAnnualized = math.Round(dsrAnnualized / roundPrecision) * roundPrecision
+
+		ch <- prometheus.MustNewConstMetric(
+			dsrAnnualizedDesc,
+			prometheus.GaugeValue,
+			dsrAnnualized
 		)
 	}
 }
