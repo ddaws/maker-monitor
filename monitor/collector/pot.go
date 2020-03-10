@@ -76,4 +76,6 @@ func (c *potCollector) Collect(ch chan<- prometheus.Metric) {
 			dsrAnnualized
 		)
 	}
+	// TODO: Measure the time since the last drip call, or the delta between drips calls. You may be able to calculate
+	//   the delta between drip calls in a Prometheus query so it may be sufficient to measure the raw value
 }
