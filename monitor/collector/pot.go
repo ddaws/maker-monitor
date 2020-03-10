@@ -57,7 +57,9 @@ func (c *potCollector) Describe(ch chan<- *prometheus.Desc) {
 func (c *potCollector) Collect(ch chan<- prometheus.Metric) {
 	// Measure the total Dai savings accumulated
 	if pieRad, err := c.pot.TotalPie(nil); err == nil {
-		pie := decimal.NewFromBigInt(pieRad, -maker.RadScale)
+		// NOTE: I think this is a wad because Pie is added against another wad in the contract code here:
+		//   https://via.hypothes.is/https://github.com/makerdao/dss/blob/master/src/pot.sol#L153
+		pie := decimal.NewFromBigInt(pieRad, -maker.WadScale)
 		pieApprox, _ := pie.Float64()
 
 		ch <- prometheus.MustNewConstMetric(
@@ -68,7 +70,7 @@ func (c *potCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 	// Measure the Dai Savings Rate
 	if dsrRad, err := c.pot.Dsr(nil); err == nil {
-		dsr := decimal.NewFromBigInt(dsrRad, -maker.RadScale)
+		dsr := decimal.NewFromBigInt(dsrRad, -maker.RayScale)
 		dsrApprox, _ := dsr.Float64()
 
 		ch <- prometheus.MustNewConstMetric(
