@@ -40,5 +40,15 @@ func (c *potCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *potCollector) Collect(ch chan<- prometheus.Metric) {
-	// TODO...
+	// Measure the total Dai savings accumulated
+	if pieRad, err := c.pot.Pie(); err == nil {
+		pie := decimal.NewFromBigInt(pieRad, -maker.RadScale)
+		pieApprox, _ := pie.Float64()
+
+		ch <- prometheus.MustNewConstMetric(
+			pieDesc,
+			prometheus.GaugeValue,
+			pieApprox,
+		)
+	}
 }
