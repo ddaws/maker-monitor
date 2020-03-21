@@ -34,4 +34,5 @@ FROM scratch
 COPY ./certs /certs
 COPY --from=builder /app/monitor /
 
+EXPOSE 8080
 ENTRYPOINT ["/monitor"]

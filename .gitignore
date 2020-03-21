@@ -1,3 +1,4 @@
 # Maker Monitor
 build/
 config.yml
+.env

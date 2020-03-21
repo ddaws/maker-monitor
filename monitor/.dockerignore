@@ -2,6 +2,7 @@ Dockerfile
 config.example.yml
 config.yml
 scripts/
+k8s/
 
 # TODO: Remove these in the future when they are no longer needed
 collector/pot.go
