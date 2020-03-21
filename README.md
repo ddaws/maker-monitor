@@ -19,10 +19,33 @@ Just run it! We're using Go modules :D
 
 ## To Do
 
+- Cоnfigure k8s for local development
 - Add Grafana (of course!)
+- Configure CI to build and publish image to Docker Hub automatically
 
-- Update Go Dockerfile to use multistage builds
-https://levelup.gitconnected.com/complete-guide-to-create-docker-container-for-your-golang-application-80f3fb59a15e
+## Deployment
+
+To deploy Maker Monitor you'll need to create a series of config maps, pods and services via Kuberenetes. The following
+set of commands assumes you've aliased `kubectl` as `k`.
+
+```bash
+# This is secrect, and isn't shared in the repo, which is why you need to create it yourself
+k create configmap monitor-config --from-literal=INFURA_PROJECT_ID=<your infura project ID>
+
+# Deploy the monitor service
+k apply -f monitor/k8s/pod.yml
+k apply -f monitor/k8s/service.yml
+
+# Deploy the prometheus service
+k create configmap prometheus-config --from-file=prometheus/prometheus.yml
+k apply -f prometheus/k8s/pod.yml
+```
+
+If you didn't run into any errors you should be able to connect to Prometheus via
+
+```bash
+k port-forward prometheus-pod 9090:9090
+```
 
 ## Useful Links
 
