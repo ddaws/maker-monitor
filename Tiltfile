@@ -11,14 +11,29 @@ local_resource(
         './monitor/collector',
     ],
 )
+# Super-simple Docker container to run the monitor process in development
+docker_build(
+    'ddaws/maker-monitor', './monitor/',
+    dockerfile_contents='''
+    FROM scratch
 
-docker_build('ddaws/maker-monitor', './monitor/', dockerfile='monitor/Dockerfile')
+    COPY ./certs /certs
+    COPY ./build/monitor /
+    
+    EXPOSE 8080
+    ENTRYPOINT ["/monitor"]
+    ''',
+    only=[
+        './build',
+        './certs',
+    ],
+)
 
 k8s_yaml([
     'monitor/k8s/pod.yml',
-    # 'monitor/k8s/service.yml',
-    # 'prometheus/k8s/pod.yml',
+    'monitor/k8s/service.yml',
+    'prometheus/k8s/pod.yml',
 ])
 
 k8s_resource('monitor-pod', port_forwards=8080)
-# k8s_resource('prometheus-pod', port_forwards=9090)
+k8s_resource('prometheus-pod', port_forwards=9090)

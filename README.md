@@ -5,23 +5,33 @@ I have chosen to use Prometheus as the backend for simplicity, and Grafana for t
 
 ## Developing
 
-### Installing Dependancies
+This project uses Docker, Kubernetes, and [Tilt](https://tilt.dev/) to try and get local development as close to the
+deployment as possible. Please make sure you have these tools installed before moving forward. Once you're setup run:
 
-Just run it! We're using Go modules :D 
+```
+# This is secrect, and isn't shared in the repo, which is why you need to create it yourself
+k create configmap monitor-config --from-literal=INFURA_PROJECT_ID=<your infura project ID>
 
-### Building the Monitor binary
+# This stores the prometheus config into a k8s config map
+k create configmap prometheus-config --from-file=prometheus/prometheus.yml
+
+# Start the stack!
+tilt up
+```
+
+### Building Monitor
 
 ```
 ./monitor/scripts/build.sh
 ```
 
-*Note:* The binary build script builds for the `golang:alpine` Docker container. Use `go build` or `go run` for local.
+*Note:* This creates a Docker images tagged `ddaws/maker-monitor:latest`
 
 ## To Do
 
-- Cоnfigure k8s for local development
+- Update Prometheus deployment to mount data volume
 - Add Grafana (of course!)
-- Configure CI to build and publish image to Docker Hub automatically
+- Update Docker image to build more efficiently (I think it's go get'ing on build)
 
 ## Deployment
 
