@@ -2,8 +2,13 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
+	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/gorilla/websocket"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -53,7 +58,7 @@ func main() {
 	if !filepath.IsAbs(configFile) {
 		absConfigPath, err := filepath.Abs(configFile)
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatal(err)
 		}
 		configFile = absConfigPath
 	}
@@ -70,17 +75,40 @@ func main() {
 
 	// Connect to Infura
 	log.Println("Connecting to Infura...")
-	infuraEndpoint := fmt.Sprintf(infuraWebSocketAddr, config.Infura.Network, config.Infura.ProjectID)
-	client, err := ethclient.Dial(infuraEndpoint)
+
+	// Load Amazon root cert that signs Infura cert
+	cert, err := ioutil.ReadFile("./certs/amazon_root.pem")
 	if err != nil {
 		log.Fatal(err)
 	}
+	roots := x509.NewCertPool()
+	ok := roots.AppendCertsFromPEM(cert)
+	if !ok {
+		log.Fatalln("Failed to add Amazon root CA to cert pool")
+	}
+
+	// Create a custom WebSocket dailer for control over the connection configuration
+	dailer := websocket.Dialer{
+		TLSClientConfig: &tls.Config{
+			RootCAs: roots,
+		},
+	}
+
+	var (
+		originHeader = "maker.monitor" // TODO: Move origin to uncommitted config to use a secret shared with Infura
+		infuraEndpoint = fmt.Sprintf("wss://%s.infura.io/ws/v3/%s", config.Infura.Network, config.Infura.ProjectID)
+	)
+	rpcClient, err := rpc.DialWebsocketWithDialer(context.TODO(), infuraEndpoint, originHeader, dailer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := ethclient.NewClient(rpcClient)
 	log.Println("Connected to Infura!")
 
 	// Load the Vat and collector
 	vat, err := maker.LoadVatCaller(client)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 	vatCollector := collector.NewVatCollector(vat)
 	prometheus.MustRegister(vatCollector)

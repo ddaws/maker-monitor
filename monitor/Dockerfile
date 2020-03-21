@@ -6,11 +6,8 @@ RUN apk --update add git less openssh && \
     rm -rf /var/lib/apt/lists/* && \
     rm /var/cache/apk/*
 
-# Set necessary environmet variables needed for our image
-ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+# Update root signing certificates
+#RUN update-ca-certificates
 
 WORKDIR /app
 
@@ -23,10 +20,18 @@ RUN go mod download
 # Copy the remaining source code
 COPY . /app
 
+# Set necessary environmet variables needed for our image
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
+
 RUN go build -o monitor .
 
 ## Step 2 - Build a small runtime image
 FROM scratch
 
+COPY ./certs /certs
 COPY --from=builder /app/monitor /
+
 ENTRYPOINT ["/monitor"]
