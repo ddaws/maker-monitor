@@ -1,4 +1,6 @@
 #!/bin/bash
 
 script_dir=$(dirname $0)
-GOOS=linux GOARCH=386 go build -o $script_dir/../build/monitor $script_dir/../main.go
+commit=$(git rev-parse --short=12 HEAD)
+
+docker build -t monitor:$commit $script_dir/../
