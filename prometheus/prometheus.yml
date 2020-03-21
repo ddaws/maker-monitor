@@ -3,10 +3,11 @@ scrape_configs:
   - job_name: prometheus
     scrape_interval: 5s
     static_configs:
-      - targets: [ 'localhost:9090' ]
+      - targets:
+        - localhost:9090
   
   - job_name: maker-monitor
     scrape_interval: 10s
     static_configs:
-    - targets:
-      - monitor:8080
+      - targets:
+        - monitor-service.maker-monitor:8080

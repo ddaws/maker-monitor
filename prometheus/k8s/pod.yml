@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prometheus-pod
+  labels:
+    app: maker-monitor
+    service: prometheus
+spec:
+  containers:
+    - name: monitor
+      image: prom/prometheus
+      ports:
+        - containerPort: 9090
+      volumeMounts:
+        - name: prom-config-vol
+          mountPath: /etc/prometheus/
+  volumes:
+    - name: prom-config-vol
+      configMap:
+        name: prometheus-config
