@@ -9,6 +9,12 @@ This project uses Docker, Kubernetes, and [Tilt](https://tilt.dev/) to try and g
 deployment as possible. Please make sure you have these tools installed before moving forward. Once you're setup run:
 
 ```
+# Create a namespace to operate in
+k create namespace maker-monitor
+
+# Set the namesapce in the current context to apply to all subsequent commands
+k config set-context --current --namespace=maker-monitor
+
 # This is secrect, and isn't shared in the repo, which is why you need to create it yourself
 k create configmap monitor-config --from-literal=INFURA_PROJECT_ID=<your infura project ID>
 
@@ -32,6 +38,7 @@ tilt up
 - Update Prometheus deployment to mount data volume
 - Add Grafana (of course!)
 - Update Docker image to build more efficiently (I think it's go get'ing on build)
+- Maybe update Tiltfile dev image adding live syncing (requires install tools into image)
 
 ## Deployment
 
