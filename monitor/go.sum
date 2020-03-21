@@ -48,6 +48,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/ddaws/go-maker v0.0.0-20200303081017-6910c07ec16b h1:Gsn6LoiKKUKKMcRTvqS1reWtf4p9cDt8i6EVs7rVm/U=
 github.com/ddaws/go-maker v0.0.0-20200303081017-6910c07ec16b/go.mod h1:9ohD2X8T16h38f9V2NfBgBflqe1hDihpGABQv69Loo4=
+github.com/ddaws/go-maker v0.0.0-20200319112206-e06005d816d3 h1:6XfxqJPr4e4eC1SwajzmTJhyjU3n7bly6iQNaGXch7U=
+github.com/ddaws/go-maker v0.0.0-20200319112206-e06005d816d3/go.mod h1:qMVhla8er/3bZZMxeEFVPTBIIjzG3wIWXREZ/VQYgUw=
 github.com/deckarep/golang-set v0.0.0-20180603214616-504e848d77ea h1:j4317fAZh7X6GqbFowYdYdI0L9bwxL07jyPZIdepyZ0=
 github.com/deckarep/golang-set v0.0.0-20180603214616-504e848d77ea/go.mod h1:93vsz/8Wt4joVM7c2AVqh+YRMiUSc14yDtF28KmMOgQ=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=

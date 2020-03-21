@@ -27,25 +27,25 @@ var (
 	)
 )
 
-type HeaderCollecter struct {
+type HeaderCollector struct {
 	mutex *sync.Mutex
 	queue []*types.Header
 }
 
-func NewHeaderCollector() *HeaderCollecter {
-	return &HeaderCollecter{
+func NewHeaderCollector() *HeaderCollector {
+	return &HeaderCollector{
 		mutex: &sync.Mutex{},
 		queue: make([]*types.Header, 0),
 	}
 }
 
-func (col *HeaderCollecter) Describe(ch chan<- *prometheus.Desc) {
+func (col *HeaderCollector) Describe(ch chan<- *prometheus.Desc) {
 	//prometheus.DescribeByCollect(col, ch)
 	ch <- gasLimitDesc
 	ch <- gasUsedDesc
 }
 
-func (col *HeaderCollecter) Collect(ch chan<- prometheus.Metric) {
+func (col *HeaderCollector) Collect(ch chan<- prometheus.Metric) {
 	log.Printf("Collect(queue=%d)\n", len(col.queue))
 	// Take a lock to prevent raise conditions accessing queue
 	col.mutex.Lock()
@@ -74,7 +74,7 @@ func (col *HeaderCollecter) Collect(ch chan<- prometheus.Metric) {
 	col.mutex.Unlock()
 }
 
-func (col *HeaderCollecter) Measure(header *types.Header) {
+func (col *HeaderCollector) Measure(header *types.Header) {
 	col.mutex.Lock()
 	col.queue = append(col.queue, header)
 	col.mutex.Unlock()

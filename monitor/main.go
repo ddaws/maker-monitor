@@ -102,7 +102,7 @@ func main() {
 	http.ListenAndServe(fmt.Sprintf("%s:%s", config.Host, config.Port), nil)
 }
 
-func listenForBlocks(client *ethclient.Client, headers chan *types.Header, headerCollector *collector.HeaderCollecter) {
+func listenForBlocks(client *ethclient.Client, headers chan *types.Header, headerCollector *collector.HeaderCollector) {
 	sub, err := client.SubscribeNewHead(context.Background(), headers)
 	if err != nil {
 		log.Fatal(err)

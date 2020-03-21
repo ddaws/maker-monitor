@@ -1,3 +1,7 @@
-scripts/
+Dockerfile
 config.example.yml
 config.yml
+scripts/
+
+# TODO: Remove these in the future when they are no longer needed
+collector/pot.go

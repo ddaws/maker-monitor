@@ -22,9 +22,10 @@ RUN go mod download
 
 # Copy the remaining source code
 COPY . /app
+
 RUN go build -o monitor .
 
-# Step 2 - Build a small runtime image
+## Step 2 - Build a small runtime image
 FROM scratch
 
 COPY --from=builder /app/monitor /
