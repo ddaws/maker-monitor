@@ -52,28 +52,31 @@ func init() {
 func main() {
 	log.Println("Starting the Maker Monitor metrics server...")
 
-	flag.StringVar(&configFile, "config", "config.yml", "Path to the config.yml file")
+	flag.StringVar(&configFile, "config", "--", "Path to the config.yml file")
 	flag.Parse()
 
-	if !filepath.IsAbs(configFile) {
-		absConfigPath, err := filepath.Abs(configFile)
+	// Read config from a file if specified, else fallback to reading from the environment
+	if configFile != "--" {
+		if !filepath.IsAbs(configFile) {
+			absConfigPath, err := filepath.Abs(configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+			configFile = absConfigPath
+		}
+		log.Printf("Reading config file %s", configFile)
+		err := cleanenv.ReadConfig(configFile, &config)
 		if err != nil {
 			log.Fatal(err)
 		}
-		configFile = absConfigPath
-	}
-
-	log.Println("Reading config...")
-	err := cleanenv.ReadConfig(configFile, &config)
-	if err != nil {
-		log.Fatal(err)
+	} else {
+		log.Println("Reading config from environment")
+		cleanenv.ReadEnv(&config)
 	}
 
 	if config.Infura.ProjectID == "" {
 		log.Fatalln("An Infura project ID must be specified to subscribe to Infura")
 	}
-
-	// Connect to Infura
 	log.Println("Connecting to Infura...")
 
 	// Load Amazon root cert that signs Infura cert
