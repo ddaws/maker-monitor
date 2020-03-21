@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/ddaws/go-maker/maker"
-	"github.com/ddaws/maker-monitor/monitor/collector"
+	"github.com/ddaws/maker-monitor/collector"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ilyakaznacheev/cleanenv"
@@ -86,12 +86,12 @@ func main() {
 	prometheus.MustRegister(vatCollector)
 
 	// Load the Pot and collector
-	pot, err := maker.LoadPotCaller(client)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	potCollector := collector.NewPotCollector(pot)
-	prometheus.MustRegister(potCollector)
+	//pot, err := maker.LoadPotCaller(client)
+	//if err != nil {
+	//	log.Fatalln(err)
+	//}
+	//potCollector := collector.NewPotCollector(pot)
+	//prometheus.MustRegister(potCollector)
 
 	// Start listening for blocks mined
 	headers := make(chan *types.Header)

@@ -10,4 +10,4 @@ require (
 	github.com/shopspring/decimal v0.0.0-20200227202807-02e2044944cc
 )
 
-//replace github.com/ddaws/go-maker => ../go-maker/
+//replace github.com/ddaws/go-maker => ../../go-maker/
