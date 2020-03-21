@@ -1,5 +1,17 @@
 # Checkout Tiltfiles! https://tilt.dev/
 
+# File watch and recompile the monitor process for Linux
+local_resource(
+    'compile-monitor',
+    'cd ./monitor && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build/monitor .',
+    deps=[
+        './monitor/go.mod',
+        './monitor/go.sum',
+        './monitor/main.go',
+        './monitor/collector',
+    ],
+)
+
 docker_build('ddaws/maker-monitor', './monitor/', dockerfile='monitor/Dockerfile')
 
 k8s_yaml([
