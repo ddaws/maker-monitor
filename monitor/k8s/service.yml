@@ -1,4 +1,15 @@
 apiVersion: v1
+kind: Service
+metadata:
+  name: monitor-service
+spec:
+  selector:
+    service: monitor
+  ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: monitor-pod
@@ -14,14 +25,3 @@ spec:
       envFrom:
         - configMapRef:
             name: monitor-config
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: monitor-service
-spec:
-  selector:
-    service: monitor
-  ports:
-    - protocol: TCP
-      port: 8080
