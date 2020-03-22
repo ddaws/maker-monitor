@@ -1,4 +1,21 @@
 apiVersion: v1
+kind: Pod
+metadata:
+  name: monitor-pod
+  labels:
+    app: maker-monitor
+    service: monitor
+spec:
+  containers:
+    - name: monitor
+      image: ddaws/maker-monitor:latest
+      ports:
+        - containerPort: 8080
+      envFrom:
+        - configMapRef:
+            name: monitor-config
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: monitor-service
