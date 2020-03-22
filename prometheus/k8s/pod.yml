@@ -6,15 +6,32 @@ metadata:
     app: maker-monitor
     service: prometheus
 spec:
+  # Updates permissions on the volume directly before mounting. This is required because local volume mounts are owned
+  # by root and can't be accessed by processes not running as root
+  initContainers:
+    - name: chown-prom-data-vol
+      image: alpine
+      securityContext:
+        privileged: true
+      command: ['chown', 'nobody:nogroup', '/prometheus']
+      volumeMounts:
+        - name: prom-data-vol
+          mountPath: /prometheus
+  # This Prometheus container
   containers:
-    - name: monitor
+    - name: prometheus
       image: prom/prometheus
       ports:
         - containerPort: 9090
       volumeMounts:
         - name: prom-config-vol
           mountPath: /etc/prometheus/
+        - name: prom-data-vol
+          mountPath: /prometheus/ # The default TSDB data dir
   volumes:
     - name: prom-config-vol
       configMap:
         name: prometheus-config
+    - name: prom-data-vol
+      persistentVolumeClaim:
+        claimName: prom-pvc

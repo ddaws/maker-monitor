@@ -6,7 +6,8 @@ I have chosen to use Prometheus as the backend for simplicity, and Grafana for t
 ## Developing
 
 This project uses Docker, Kubernetes, and [Tilt](https://tilt.dev/) to try and get local development as close to the
-deployment as possible. Please make sure you have these tools installed before moving forward. Once you're setup run:
+deployment as possible. Please make sure you have these tools installed before moving forward. Once you're setup we can
+start by creating the Kubernetes resources we only need once
 
 ```
 # Create a namespace to operate in
@@ -21,9 +22,18 @@ k create configmap monitor-config --from-literal=INFURA_PROJECT_ID=<your infura 
 # This stores the prometheus config into a k8s config map
 k create configmap prometheus-config --from-file=prometheus/prometheus.yml
 
-# Start the stack!
+# Create our local Persistant Volume and Persistant Volume Claim to store Prometheus data
+k create -f prometheus/k8s/local_volume.yml
+```
+
+Of course, this assumes you've aliased `kubectl` as `k`. Next start up the stack using Tilt!
+
+```bash
 tilt up
 ```
+
+Tilt should open a browser UI so you can see the status of services. When all of the services have finished 
+initialization you should be able to view Prometheus at https://localhost:9090
 
 ### Building Monitor
 
@@ -35,15 +45,14 @@ tilt up
 
 ## To Do
 
-- Update Prometheus deployment to mount data volume
 - Add Grafana (of course!)
 - Update Docker image to build more efficiently (I think it's go get'ing on build)
 - Maybe update Tiltfile dev image adding live syncing (requires install tools into image)
 
 ## Deployment
 
-To deploy Maker Monitor you'll need to create a series of config maps, pods and services via Kuberenetes. The following
-set of commands assumes you've aliased `kubectl` as `k`.
+To deploy Maker Monitor you'll need to create a series of config maps, pods and services via Kuberenetes. Let's get
+started by creating our local resources. You only need to do this once
 
 ```bash
 # This is secrect, and isn't shared in the repo, which is why you need to create it yourself
@@ -57,6 +66,8 @@ k apply -f monitor/k8s/service.yml
 k create configmap prometheus-config --from-file=prometheus/prometheus.yml
 k apply -f prometheus/k8s/pod.yml
 ```
+
+Of course, this assumes you've aliased `kubectl` as `k`. If not, I recommend it ;)
 
 If you didn't run into any errors you should be able to connect to Prometheus via
 
