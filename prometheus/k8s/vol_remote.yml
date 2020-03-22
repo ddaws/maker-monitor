@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prom-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  # For more info see https://www.digitalocean.com/docs/kubernetes/how-to/add-volumes/
+  storageClassName: do-block-storage

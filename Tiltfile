@@ -31,7 +31,7 @@ docker_build(
 
 k8s_yaml([
     'monitor/k8s/service.yml',
-    'prometheus/k8s/local_volume.yml',
+    'prometheus/k8s/vol_local.yml',
     'prometheus/k8s/pod.yml',
 ])
 
