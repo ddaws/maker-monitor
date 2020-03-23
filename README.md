@@ -22,8 +22,9 @@ k create configmap monitor-config --from-literal=INFURA_PROJECT_ID=<your infura 
 # This stores the prometheus config into a k8s config map
 k create configmap prometheus-config --from-file=prometheus/prometheus.yml
 
-# Create our local Persistant Volume and Persistant Volume Claim to store Prometheus data
-k create -f prometheus/k8s/local_volume.yml
+# Create our local PVs and PVCs to store persistant data
+k create -f prometheus/k8s/vol_local.yml
+k create -f grafana/k8s/vol_local.yml
 ```
 
 Of course, this assumes you've aliased `kubectl` as `k`. Next start up the stack using Tilt!
@@ -35,7 +36,7 @@ tilt up
 Tilt should open a browser UI so you can see the status of services. When all of the services have finished 
 initialization you should be able to view Prometheus at https://localhost:9090
 
-### Building Monitor
+### Building the `monitor` process binary
 
 ```
 ./monitor/scripts/build.sh
@@ -43,9 +44,18 @@ initialization you should be able to view Prometheus at https://localhost:9090
 
 *Note:* This creates a Docker images tagged `ddaws/maker-monitor:latest`
 
+### Exposing Grafana via a local Ingress
+
+To expose Grafana locally via an Ingress you'll need to make sure you have an Ingress Controller running on your local
+cluster. You can use the [Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/) which is tested and
+working on Mac. Please follow [the instructions found here to install the local Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/deploy/). 
+It may take a few minutes for the Ingress controller to start.
+
 ## To Do
 
-- Add Grafana (of course!)
+- Add an Ingres to expose Grafana https://kubernetes.io/docs/concepts/services-networking/ingress/ 
+- Mount Grafana config via a ConfigMap to version control it here in the repo
+- Add remote volume for Grafana
 - Update Docker image to build more efficiently (I think it's go get'ing on build)
 - Maybe update Tiltfile dev image adding live syncing (requires install tools into image)
 
@@ -59,12 +69,11 @@ started by creating our local resources. You only need to do this once
 k create configmap monitor-config --from-literal=INFURA_PROJECT_ID=<your infura project ID>
 
 # Deploy the monitor service
-k apply -f monitor/k8s/pod.yml
 k apply -f monitor/k8s/service.yml
 
 # Deploy the prometheus service
 k create configmap prometheus-config --from-file=prometheus/prometheus.yml
-k apply -f prometheus/k8s/pod.yml
+k apply -f prometheus/k8s/service.yml
 ```
 
 Of course, this assumes you've aliased `kubectl` as `k`. If not, I recommend it ;)
