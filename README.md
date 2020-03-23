@@ -53,9 +53,19 @@ It may take a few minutes for the Ingress controller to start.
 
 ## To Do
 
-- Add an Ingres to expose Grafana https://kubernetes.io/docs/concepts/services-networking/ingress/ 
+#### Deployments
+
+- Convert naked pods to deployments to allow for better management (should allow for updating pods via scaling down & up)
 - Mount Grafana config via a ConfigMap to version control it here in the repo
+- Create remote config map for Grafana config in prod
 - Add remote volume for Grafana
+
+#### Metrics Collection
+
+- Update `monitor` process to use the Multicall contract and query Maker stats per ETH block published
+
+#### Improvements
+
 - Update Docker image to build more efficiently (I think it's go get'ing on build)
 - Maybe update Tiltfile dev image adding live syncing (requires install tools into image)
 
