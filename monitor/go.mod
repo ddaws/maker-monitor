@@ -3,7 +3,7 @@ module github.com/ddaws/maker-monitor
 go 1.13
 
 require (
-	github.com/btcsuite/btcd v0.20.1-beta // indirect
+	github.com/btcsuite/btcd v0.23.2 // indirect
 	github.com/ddaws/go-maker v0.0.0-20200319112206-e06005d816d3
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/gorilla/websocket v1.4.2
